@@ -1,5 +1,5 @@
 # cpiclasser:
-**AUTHOR**: Ross Beck-MacNeil (CPD) - ross.beck-macneil@canada.ca
+**AUTHOR** Ross Beck-MacNeil (CPD) - ross.beck-macneil@canada.ca
 
 This Python package contains code that helps with classifying scanner and webscraped data to the CPI classsification system. It is also general enough to work for other text classificaton problems.
 

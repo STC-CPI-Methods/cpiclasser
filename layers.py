@@ -2,13 +2,16 @@ import keras
 from keras import backend as K
 import tensorflow as tf    
 
+# Implementing layers for any custom operation that has trainable weights.
+
 class ReducerSum(keras.layers.Layer):
     def __init__(self, **kwargs):
         super(ReducerSum, self).__init__(**kwargs)
         self.supports_masking = True
         
     def compute_mask(self, inputs, mask=None):
-        #will pass a mask only if all entry were masked 
+        # It will pass a mask only if all entries were masked,
+        # otherwise it won't pass the mask to the next layers
         if len(inputs.shape)  > 2 and mask is not None:
             mask = K.all(mask, axis=-1, keepdims=False)
         else: #don't return mask if not enough dimsions
@@ -16,8 +19,9 @@ class ReducerSum(keras.layers.Layer):
     
     def compute_output_shape(self, input_shape):
         return input_shape[0:-2] + (input_shape[-1],)
+    # call: This is where the layer's logic lives.
     def call(self, inputs, mask = None):
-        #only operate on last axis
+        # It only operates in the last axis
         if mask is not None:
             mask = K.cast(mask, 'float32')
             mask = K.expand_dims(mask, axis=-1)
@@ -41,10 +45,13 @@ class ReducerMean(keras.layers.Layer):
     def call(self, inputs, mask = None):
         #only operate on last axis
         if mask is not None:
-            mask = K.cast(mask, 'float32')
+            mask = K.cast(mask, 'float32')  # cast the mask to float32
             #add axis for broadcasting
             mask = K.expand_dims(mask, axis=-1)
+            # in some cases especially in the early stages of training the sum may be almost zero
+            # and this results in NaN's. A workaround is to add a very small positive number ε to the sum.
             return K.sum(inputs*mask, axis=-2) / (K.sum(mask, axis=-2) +K.epsilon())
+        
         else:
             return K.mean(inputs, axis=-2)
         
